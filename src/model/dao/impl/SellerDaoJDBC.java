@@ -62,34 +62,34 @@ public class SellerDaoJDBC implements SellerDao {
 		}
 		finally {
 			DB.closeStatement(st);
-			DB.closeConnection();
 		}
 	}
 
 	@Override
 	public void update(Seller obj) {
-PreparedStatement st = null;
+		PreparedStatement st = null;
 		
 		try {
 			conn = DB.getConnection();
 			
-			st = conn.prepareStatement("UPDATE Department " +
-			                           "SET Name = ? " +
-					                   "Where Id = ?");
+			st = conn.prepareStatement("UPDATE seller "
+					                 + "SET Name = ?, Email = ?, BirthDate = ?, BaseSalary = ?, DepartmentId = ? "
+			                  		 + "WHERE Id = ?");
 			
-			st.setString(1, "Depto Teste");
-			st.setInt(2, 5);
+			st.setString(1, obj.getName());
+			st.setString(2, obj.getEmail());
+			st.setDate(3, new java.sql.Date(obj.getBirthDate().getTime()));
+			st.setDouble(4, obj.getBaseSalary());
+			st.setInt(5, obj.getDepartment().getId());
+			st.setInt(6, obj.getId());
 			
-			int rowsAffect  = st.executeUpdate();
-			
-			System.out.println("Done! - Linhas afetadas = " + rowsAffect);			
+			st.executeUpdate();
 		}
 		catch (SQLException e) {
-			e.printStackTrace();
+			throw new DbException(e.getMessage());
 		}
 		finally {
 			DB.closeStatement(st);
-			DB.closeConnection();
 		}
 	}
 
