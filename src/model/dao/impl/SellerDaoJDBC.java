@@ -95,8 +95,28 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public void deleteById(Integer id) {
-		// TODO Auto-generated method stub
+		PreparedStatement st = null;
 		
+		try {
+			conn = DB.getConnection();
+			
+			st = conn.prepareStatement("DELETE FROM seller\r\n"
+				                     + "WHERE Id = ?");
+			
+			st.setInt(1, id);
+			
+			int rowsAffect = st.executeUpdate();
+			
+			if (rowsAffect == 0) {
+				throw new DbException("Deleção não executada - Id não encontrado");
+			}
+		}
+		catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(st);
+		}
 	}
 
 	@Override
@@ -135,30 +155,6 @@ public class SellerDaoJDBC implements SellerDao {
 		}
 	}
 	
-	private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
-		
-		Seller seller = new Seller();
-		
-		seller.setId(rs.getInt("Id"));
-		seller.setName(rs.getString("Name"));
-		seller.setEmail(rs.getString("Email"));
-		seller.setBirthDate(rs.getDate("BirthDate"));
-		seller.setBaseSalary(rs.getDouble("BaseSalary"));
-		seller.setDepartment(dep);
-		
-		return seller;
-	}
-
-	private Department instantiateDepartment(ResultSet rs) throws SQLException {
-		
-		Department dep = new Department();
-		
-		dep.setId(rs.getInt("DepartmentId"));
-		dep.setName(rs.getString("DepName"));
-		
-		return dep;
-	}
-
 	@Override
 	public List<Seller> findAll() {
 		PreparedStatement st = null;
@@ -243,4 +239,28 @@ public class SellerDaoJDBC implements SellerDao {
 		}
 	}
 
+	private Seller instantiateSeller(ResultSet rs, Department dep) throws SQLException {
+		
+		Seller seller = new Seller();
+		
+		seller.setId(rs.getInt("Id"));
+		seller.setName(rs.getString("Name"));
+		seller.setEmail(rs.getString("Email"));
+		seller.setBirthDate(rs.getDate("BirthDate"));
+		seller.setBaseSalary(rs.getDouble("BaseSalary"));
+		seller.setDepartment(dep);
+		
+		return seller;
+	}
+
+	private Department instantiateDepartment(ResultSet rs) throws SQLException {
+		
+		Department dep = new Department();
+		
+		dep.setId(rs.getInt("DepartmentId"));
+		dep.setName(rs.getString("DepName"));
+		
+		return dep;
+	}
+	
 }
