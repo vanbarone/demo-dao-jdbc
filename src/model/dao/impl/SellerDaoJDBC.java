@@ -4,6 +4,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,14 +28,69 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public void insert(Seller obj) {
-		// TODO Auto-generated method stub
 		
+		PreparedStatement st = null;
+		
+		try {
+			st = conn.prepareStatement("INSERT INTO seller " +
+			                           "(Name, Email, BirthDate, BaseSalary, DepartmentId) " +
+					                   "VALUES (?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+			
+			st.setString(1, obj.getName());
+			st.setString(2, obj.getEmail());
+			st.setDate(3, new java.sql.Date(obj.getBirthDate().getTime()));
+			st.setDouble(4, obj.getBaseSalary());
+			st.setInt(5, obj.getDepartment().getId());
+			
+			int rowsAffect  = st.executeUpdate();
+			
+			if (rowsAffect > 0) {
+				ResultSet rs = st.getGeneratedKeys();
+				
+				if (rs.next()) {
+					obj.setId(rs.getInt(1));
+				}
+				
+				DB.closeResultset(rs);
+			}
+			else {
+				throw new DbException("Nenhum registro incluído");
+			}
+		}
+		catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(st);
+			DB.closeConnection();
+		}
 	}
 
 	@Override
 	public void update(Seller obj) {
-		// TODO Auto-generated method stub
+PreparedStatement st = null;
 		
+		try {
+			conn = DB.getConnection();
+			
+			st = conn.prepareStatement("UPDATE Department " +
+			                           "SET Name = ? " +
+					                   "Where Id = ?");
+			
+			st.setString(1, "Depto Teste");
+			st.setInt(2, 5);
+			
+			int rowsAffect  = st.executeUpdate();
+			
+			System.out.println("Done! - Linhas afetadas = " + rowsAffect);			
+		}
+		catch (SQLException e) {
+			e.printStackTrace();
+		}
+		finally {
+			DB.closeStatement(st);
+			DB.closeConnection();
+		}
 	}
 
 	@Override
